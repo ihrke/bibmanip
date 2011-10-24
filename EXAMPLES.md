@@ -3,20 +3,20 @@ Example:
 
 ### Merging two files with partially overlapping entries ###
 
-* simple append the files
+* concatenate the files
 
 ```shell
  cat file1.bib > bfile.bib
  cat file2.bib >> bfile.bib
 ```
 
-* detect duplicates
+* detect duplicates and output to dup.bib (output for merging)
 
 ```shell
  bibmanip.py bfile.bib duplicates -o dup.bib
 ```
 
-* cut these from the original file
+* cut the duplicates from the original file (for concatenating after merging)
 
 ```shell
  x=`bibmanip.py bfile.bib listkeys -p`
