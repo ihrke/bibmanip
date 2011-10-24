@@ -9,7 +9,21 @@ See
 bibmanip -h
 ```
 
-for a list of the available subcommands.
+for a list of the available subcommands (this list is also in HELP.txt).
+
+For some examples, see [Examples](Examples.md).
+
+Things to know
+--------------
+
+I have some functionality for "tags" which I use pretty much as citeulike does. 
+Any bibtex-entry may have a field 
+
+```
+tags={tag1;tag2;tag3}
+```
+
+and the scripts can operate on them (e.g., split a master.bib file into separate tag1.bib, tag2.bib, ... files)
 
 
 Notes
