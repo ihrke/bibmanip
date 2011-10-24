@@ -33,15 +33,29 @@ def colored( str, color=None, attrs=None):
 
 def addtag( bibfile, args ):
     """
-    Usage: bibmanip.py bibfile.bib addtag <regexp> tag1[tag2;tag3;...]
+    Usage: addtag [-h] <regexp> tag1 [tag2 tag3 ...]
     
     The tag(s) are added for any entry that has a match for the regexp.
+
+    Options:
+     * -h -- print help and exit
     """
-    if len(args)<2:
-        print __my_doc__()
-        sys.exit();
-    regex=args[0];
-    tags=[t.strip() for t in args[1].split(";")];
+
+    try:
+        opts,bargs=getopt.getopt( args, "h");
+        opts=dict(opts);
+        if opts.has_key("-h"):
+            print __my_doc__()
+            sys.exit()
+        if len(bargs)<2:
+            raise getopt.GetoptError(colored("ERROR: need regex and at least one tag","red"))
+        regex=bargs[0]
+        tags=bargs[1]
+    except getopt.GetoptError, err:
+        print str(err) # will print something like "option -a not recognized"
+        print __my_doc__();
+        sys.exit()
+    
     for e in bibfile.bibentries:
         if e.re_match( regex ):
             e.add_tag(tags);
@@ -51,12 +65,13 @@ def addtag( bibfile, args ):
 
 def delfield( bibfile, args ):
     """
-    Usage: bibmanip.py bibfile.bib [-r] [-m regex] [-o output] fieldname1 [fieldname2 ...]
+    Usage: delfield [-r] [-m regex] [-o output] fieldname1 [fieldname2 ...]
     
     Delete the fieldname from any bibtex-entry.
     If regex is provided, only for entries that match.
 
     Options:
+    * -h -- print help and exit
     * -r -- if provided, 'fieldname' is regarded as a regular expression;
             any fieldname that matches this regex is deleted
             Example: -r citeulike-.+ will match any fieldnames from the citeulike site
@@ -65,8 +80,11 @@ def delfield( bibfile, args ):
     """
     
     try:
-        opts,bargs=getopt.getopt( args, "rm:o:");
+        opts,bargs=getopt.getopt( args, "rm:o:h");
         opts=dict(opts);
+        if opts.has_key("-h"):
+            print __my_doc__()
+            sys.exit()
         if len(bargs)<1:
             raise getopt.GetoptError(colored("ERROR: need at least one fieldname","red"))
         fields=bargs
@@ -129,6 +147,7 @@ def matchpdf( bibfile, args ):
     for the title. 
 
     Options
+    * -h -- print help and exit    
     * -o outfile -- redirect output to outfile; else it is written to stdout
     * -e -- match also entries with existing pdf-tag
     * -s sep -- character or string separating authors/year/optional
@@ -139,11 +158,14 @@ def matchpdf( bibfile, args ):
             plus means the pdf has to fulfill both author/year and pdf-introspection
     """
     try:
-        opts,bargs=getopt.getopt( args, "o:es:Ci:");
+        opts,bargs=getopt.getopt( args, "ho:es:Ci:");
+        opts=dict(opts);        
+        if opts.has_key("-h"):
+            print __my_doc__()
+            sys.exit()
         if len(bargs)<1:
             raise getopt.GetoptError(colored("ERROR: Need a directory for the PDF files","red"))
         pdfdir=bargs[0];
-        opts=dict(opts);
         sepchar=opts["-s"] if opts.has_key("-s") else "_"
         outfile=opts["-o"] if opts.has_key("-o") else None
         ignorecase=False if opts.has_key("-C") else True
@@ -223,14 +245,15 @@ def matchpdf( bibfile, args ):
 
 def duplicates( bibfile, args ):
     """
-    Usage: bibmanip.py bibfile.bib duplicates [-o outfile] [-c] [-p] [-l]
+    Usage: duplicates [-o outfile] [-c] [-p] [-l]
 
     Search for duplicates and write a new bibtex-file consisting of each of the
     duplicates plus a merged version for conflict resolution.
     A list of the found duplicate keys is printed which may be used with
     'cutentries' to remove and merge the resolved file.
 
-    Options
+    Options:
+    * -h -- print help and exit    
     * -c -- colourize the output (nice for viewing, bad for editing, therefore
             off by default)
     * -o outfile -- redirect output to outfile; else it is written to stdout
@@ -238,8 +261,11 @@ def duplicates( bibfile, args ):
     * -l -- print a list of the duplicate keys; no other output
     """
     try:
-        opts,bargs=getopt.getopt( args, "o:cpl");
+        opts,bargs=getopt.getopt( args, "ho:cpl");
         opts=dict(opts);
+        if opts.has_key("-h"):
+            print __my_doc__()
+            sys.exit()
         outfile=outfile=opts["-o"] if opts.has_key("-o") else None
         colourize=True if opts.has_key("-c") else False
         printorg=True if opts.has_key("-p") else False
@@ -277,9 +303,10 @@ def duplicates( bibfile, args ):
 
 def listentries( bibfile, args ):
     """
-    Usage: bibmanip.py bibfile.bib listentries [-o outfile] [-p] [-t type] [-r regex]
+    Usage: listentries [-o outfile] [-p] [-t type] [-r regex]
 
-    Options
+    Options:
+    * -h -- print help and exit    
     * -p -- output only the keys separated by spaces (for use with
             e.g. cutentries; else mory fancy output
     * -t type -- output only the entries that are of type (e.g. article, book,...)
@@ -287,8 +314,11 @@ def listentries( bibfile, args ):
     * -o outfile -- redirect output to outfile; else it is written to stdout    
     """
     try:
-        opts,bargs=getopt.getopt( args, "o:pt:r:");
+        opts,bargs=getopt.getopt( args, "ho:pt:r:");
         opts=dict(opts);
+        if opts.has_key("-h"):
+            print __my_doc__()
+            sys.exit()
         outfile = opts["-o"] if  opts.has_key("-o") else None
         fancy=True if opts.has_key("-p") else False
         etype=opts["-t"] if opts.has_key("-t") else None
@@ -310,15 +340,19 @@ def listentries( bibfile, args ):
 
 def sort( bibfile, args ):
     """
-    Usage: bibmanip.py bibfile.bib sort [-o outfile] [-f field]
+    Usage: sort [-o outfile] [-f field]
 
-    Options
+    Options:
+    * -h -- print help and exit    
     * -f field -- sort the entries by field; default is to sort by key
     * -o outfile -- redirect output to outfile; else it is written to stdout    
     """
     try:
-        opts,bargs=getopt.getopt( args, "o:f:");
+        opts,bargs=getopt.getopt( args, "ho:f:");
         opts=dict(opts);
+        if opts.has_key("-h"):
+            print __my_doc__()
+            sys.exit()
         outfile = opts["-o"] if  opts.has_key("-o") else None
         sortfield = opts["-f"] if  opts.has_key("-f") else None
     except getopt.GetoptError, err:
@@ -343,23 +377,27 @@ def sort( bibfile, args ):
           
 def addentries( bibfile, args ):
     """
-    Usage: bibmanip.py bibfile.bib addentries [-o outfile] [-p path/to/pdf.pdf]
-                                              [-t tag1;tag2;...] [-s] <input-file|->
+    Usage: addentries [-o outfile] [-p path/to/pdf.pdf]
+                      [-t tag1;tag2;...] [-s] <input-file|->
 
     Reads and appends the entries from <input-file> or from stdin when - is given.
 
-    Options
+    Options:
+    * -h -- print help and exit    
     * -o outfile -- redirect output to outfile; else it is written to stdout
     * -p path/to/pdf.pdf -- use the provided pdf file (is used for all entries)
     * -t tag1;tag2;... -- use these tags
     * -s -- assume the file is sorted and put it at the appropriate place
     """
     try:
-        opts,bargs=getopt.getopt( args, "o:p:t:s")
+        opts,bargs=getopt.getopt( args, "ho:p:t:s")
+        opts=dict(opts)
+        if opts.has_key("-h"):
+            print __my_doc__()
+            sys.exit()
         if len(bargs)<1:
             raise getopt.GetoptError(colored("ERROR: Need an input","red"))
         infile=bargs[0];
-        opts=dict(opts);
         outfile=opts["-o"] if opts.has_key("-o") else None
         tags=opts["-t"] if opts.has_key("-t") else []
         pdf=opts["-p"] if opts.has_key("-p") else None
@@ -406,16 +444,20 @@ def addentries( bibfile, args ):
   
 def cutentries( bibfile, args ):
     """
-    Usage: bibmanip.py bibfile.bib cutentries [-o outfile] [-d] [-k] key1 [key2 key3 ...]
+    Usage: cutentries [-o outfile] [-d] [-k] key1 [key2 key3 ...]
 
-    Options
+    Options:
+    * -h -- print help and exit    
     * -d -- delete the keys (default)
     * -k -- keep the keys (and remove everything else)
     * -o outfile -- redirect output to outfile; else it is written to stdout    
     """
     try:
-        opts,bargs=getopt.getopt( args, "dko:");
+        opts,bargs=getopt.getopt( args, "hdko:");
         opts=dict(opts);
+        if opts.has_key("-h"):
+            print __my_doc__()
+            sys.exit()
         if len(bargs)<1:
             raise getopt.GetoptError(colored("ERROR: Need at least one key","red"))
         keys=bargs;
@@ -446,7 +488,7 @@ def cutentries( bibfile, args ):
 
 def compare( bibfile, args ):
     """
-    Usage: bibmanip.py bibfile.bib compare [-c key|title] [-p file1|file2|both] bibfile2.bib 
+    Usage: compare [-c key|title] [-p file1|file2|both] bibfile2.bib 
 
     Checks which citation key is present in either one of the to .bib files.
     If the optional argument 'bytitle' is given, the title is used
@@ -457,13 +499,17 @@ def compare( bibfile, args ):
     Entries that are only available in the 1st file will by _green_.
     Entries that are available in both files are _blue_.
 
-    Arguments:
+    Options:
+     * -h -- print help and exit        
      * -c key|title -- compare using 'key' or 'title'
      * -p file1|file2|both -- print either 'file1', 'file2' or 'both' (default: both)
     """
     try:
-        opts,bargs=getopt.getopt( args, "c:p:");
+        opts,bargs=getopt.getopt( args, "hc:p:");
         opts=dict(opts);
+        if opts.has_key("-h"):
+            print __my_doc__()
+            sys.exit()
         if len(bargs)<1:
             raise getopt.GetoptError(colored("ERROR: Need a 2nd bibfile for comparison","red"))
         matchkey="key";
@@ -562,18 +608,22 @@ def compare( bibfile, args ):
 
 def checkpdf( bibfile, args ):
     """
-    Usage: bibmanip.py bibfile.bib checkpdf [-u|m pdfdir]
+    Usage: checkpdf [-u|m pdfdir]
 
     Lists all entries containing a pdf and tells the status of the
     corresponding file.
     
     Options:
+    * -h -- print help and exit    
     * -u -- list all PDFs in pdfdir that are not matched in bibfile
     * -m -- list all PDFs in pdfdir that are matched in bibfile    
     """
     try:
-        opts,bargs=getopt.getopt( args, "u:m:")
+        opts,bargs=getopt.getopt( args, "hu:m:")
         opts=dict(opts)
+        if opts.has_key("-h"):
+            print __my_doc__()
+            sys.exit()
         list_unmatched=opts["-u"] if opts.has_key("-u") else None
         list_matched=opts["-m"] if opts.has_key("-m") else None
         if list_unmatched and list_matched:
@@ -611,18 +661,22 @@ def checkpdf( bibfile, args ):
 
 def splitbytag( bibfile, args ):
     """
-    Usage: bibmanip.py bibfile.bib splitbytag [-u] [-a] outputdir
+    Usage: splitbytag [-u] [-a] outputdir
 
     Creates separate bibtex-files for each tag, each containing
     bibfile's entries belonging to each tag and all strings/comments.
 
     Options:
+    * -h -- print help and exit    
     * -u -- include untagged entry in 'notag.bib'
     * -a -- include all entries in 'all.bib'
     """
     try:
-        opts,bargs=getopt.getopt( args, "ua")
+        opts,bargs=getopt.getopt( args, "hua")
         opts=dict(opts)
+        if opts.has_key("-h"):
+            print __my_doc__()
+            sys.exit()
         untagged=True if opts.has_key("-u") else False
         alltag=True if opts.has_key("-a") else False
         if len(bargs)<1:
@@ -659,10 +713,21 @@ def splitbytag( bibfile, args ):
 
 def stats( bibfile, args ):
     """
-    Usage: bibmanip.py bibfile.bib stats
+    Usage: stats [-h]
 
     Print some statistics about the bibtex-file.
     """
+    try:
+        opts,bargs=getopt.getopt( args, "h");
+        opts=dict(opts);
+        if opts.has_key("-h"):
+            print __my_doc__()
+            sys.exit()
+    except getopt.GetoptError, err:
+        print str(err) # will print something like "option -a not recognized"
+        print __my_doc__();
+        sys.exit()
+    
     print "File: %s"%colored(bibfile.bibfile, "red")
     print " Comments: %i"%len(bibfile.bibcomments)
     print " String  : %i"%len(bibfile.bibstrings)
