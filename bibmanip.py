@@ -678,33 +678,34 @@ def stats( bibfile, args ):
         print "   %s (%i)"%(colored(t,"yellow"),tags[t])
     
 ### main file
-if len(sys.argv)<3:
-    print colored("Usage: %s bibfile.bib <command> [command_args]\n"%
-                  sys.argv[0], "yellow",attrs=["bold"]);
-    print "Available commands: "+colored(", ".join(commands), "green", attrs=["bold"])+"\n"
-    for c in commands:
-        print "==%s"%colored(c,color="green",attrs=["bold"])
-        print eval(c).__doc__
-    sys.exit();
+if __name__=="__main__":
+    if len(sys.argv)<3:
+        print colored("Usage: %s bibfile.bib <command> [command_args]\n"%
+                      sys.argv[0], "yellow",attrs=["bold"]);
+        print "Available commands: "+colored(", ".join(commands), "green", attrs=["bold"])+"\n"
+        for c in commands:
+            print "==%s"%colored(c,color="green",attrs=["bold"])
+            print eval(c).__doc__
+        sys.exit();
 
-bibfilename=sys.argv[1];
-if not os.path.exists(bibfilename):
-    print colored("ERROR: ","red")+"%s does not exist"%colored(bibfilename,"green");
-    sys.exit();
-command=sys.argv[2];
-if not dict([(x,0) for x in commands]).has_key(command):
-    print colored("ERROR","red")+" -- do not know command %s"%colored(command,"yellow")
-    sys.exit();
-    
-args=sys.argv[3:];
-bib=BibtexFile(bibfilename);
-bib.parse();
+    bibfilename=sys.argv[1];
+    if not os.path.exists(bibfilename):
+        print colored("ERROR: ","red")+"%s does not exist"%colored(bibfilename,"green");
+        sys.exit();
+    command=sys.argv[2];
+    if not dict([(x,0) for x in commands]).has_key(command):
+        print colored("ERROR","red")+" -- do not know command %s"%colored(command,"yellow")
+        sys.exit();
 
-# add a comment about the current operation
-comment=BibtexComment("Modified by call: \'%s\' (%s)"%(" ".join(sys.argv),time.asctime()));
-bib.bibcomments.append(comment);
+    args=sys.argv[3:];
+    bib=BibtexFile(bibfilename);
+    bib.parse();
 
-# run the command
-bib=eval("%s(bib,args)"%(command));
+    # add a comment about the current operation
+    comment=BibtexComment("Modified by call: \'%s\' (%s)"%(" ".join(sys.argv),time.asctime()));
+    bib.bibcomments.append(comment);
+
+    # run the command
+    bib=eval("%s(bib,args)"%(command));
 
 
