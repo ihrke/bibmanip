@@ -1,0 +1,166 @@
+
+Usage: bibmanip [-h] [-c] bibfile.bib <command> [command_args]
+
+Bibtex-manipulation program.
+
+Options:
+ * -h -- print help and exit
+ * -c -- use colored output (termcolor.py)
+
+
+Available commands: addentries, addtag, checkpdf, compare, cutentries, delfield, duplicates, listentries, matchpdf, sort, splitbytag, stats
+
+==addentries
+
+    Usage: bibmanip.py bibfile.bib addentries [-o outfile] [-p path/to/pdf.pdf]
+                                              [-t tag1;tag2;...] [-s] <input-file|->
+
+    Reads and appends the entries from <input-file> or from stdin when - is given.
+
+    Options
+    * -o outfile -- redirect output to outfile; else it is written to stdout
+    * -p path/to/pdf.pdf -- use the provided pdf file (is used for all entries)
+    * -t tag1;tag2;... -- use these tags
+    * -s -- assume the file is sorted and put it at the appropriate place
+    
+==addtag
+
+    Usage: bibmanip.py bibfile.bib addtag <regexp> tag1[tag2;tag3;...]
+    
+    The tag(s) are added for any entry that has a match for the regexp.
+    
+==checkpdf
+
+    Usage: bibmanip.py bibfile.bib checkpdf [-u|m pdfdir]
+
+    Lists all entries containing a pdf and tells the status of the
+    corresponding file.
+    
+    Options:
+    * -u -- list all PDFs in pdfdir that are not matched in bibfile
+    * -m -- list all PDFs in pdfdir that are matched in bibfile    
+    
+==compare
+
+    Usage: bibmanip.py bibfile.bib compare [-c key|title] [-p file1|file2|both] bibfile2.bib 
+
+    Checks which citation key is present in either one of the to .bib files.
+    If the optional argument 'bytitle' is given, the title is used
+    (title converted to all lower-case, all non-alpha characters are deleted
+    before comparison).
+    
+    Entries that are only available in the 1st file will by _yellow_.
+    Entries that are only available in the 1st file will by _green_.
+    Entries that are available in both files are _blue_.
+
+    Arguments:
+     * -c key|title -- compare using 'key' or 'title'
+     * -p file1|file2|both -- print either 'file1', 'file2' or 'both' (default: both)
+    
+==cutentries
+
+    Usage: bibmanip.py bibfile.bib cutentries [-o outfile] [-d] [-k] key1 [key2 key3 ...]
+
+    Options
+    * -d -- delete the keys (default)
+    * -k -- keep the keys (and remove everything else)
+    * -o outfile -- redirect output to outfile; else it is written to stdout    
+    
+==delfield
+
+    Usage: bibmanip.py bibfile.bib [-r] [-m regex] [-o output] fieldname1 [fieldname2 ...]
+    
+    Delete the fieldname from any bibtex-entry.
+    If regex is provided, only for entries that match.
+
+    Options:
+    * -r -- if provided, 'fieldname' is regarded as a regular expression;
+            any fieldname that matches this regex is deleted
+            Example: -r citeulike-.+ will match any fieldnames from the citeulike site
+    * -m regex -- delete only fields in entries where the regex matches the entry
+    * -o outfile -- redirect output to outfile; else it is written to stdout
+    
+==duplicates
+
+    Usage: bibmanip.py bibfile.bib duplicates [-o outfile] [-c] [-p] [-l]
+
+    Search for duplicates and write a new bibtex-file consisting of each of the
+    duplicates plus a merged version for conflict resolution.
+    A list of the found duplicate keys is printed which may be used with
+    'cutentries' to remove and merge the resolved file.
+
+    Options
+    * -c -- colourize the output (nice for viewing, bad for editing, therefore
+            off by default)
+    * -o outfile -- redirect output to outfile; else it is written to stdout
+    * -p -- print both original entries in addition to the merged one
+    * -l -- print a list of the duplicate keys; no other output
+    
+==listentries
+
+    Usage: bibmanip.py bibfile.bib listentries [-o outfile] [-p] [-t type] [-r regex]
+
+    Options
+    * -p -- output only the keys separated by spaces (for use with
+            e.g. cutentries; else mory fancy output
+    * -t type -- output only the entries that are of type (e.g. article, book,...)
+    * -r regex -- output only the entries that match the regex
+    * -o outfile -- redirect output to outfile; else it is written to stdout    
+    
+==matchpdf
+
+    Usage: bibmanip.py bibfile.bib matchpdf [-o outfile] [-C] [-e] [-s sep]
+                                            [-i none|only|plus] pdfdirectory
+
+    Look through all PDFs in pdfdirectory and match them to the entries in bibfile.bib.
+    PDFs are assumed to be in
+
+    Author1[_Author2_...]_Year[_Optional].pdf
+
+    format (the underscore can be another separating character specified with -s).
+
+    The matching is done as follows:
+    * Authors are matched to the authors-string
+    * Year is matched to the year-string
+    * optional is currently ignored
+    only if author and year can be found in the bibtex-entry is
+    the pdf included.
+    Entries that already have pdf-field are not considered except, when -e is provided.
+    There is also an option to read the first page of each pdf-file and compare
+    for the title. 
+
+    Options
+    * -o outfile -- redirect output to outfile; else it is written to stdout
+    * -e -- match also entries with existing pdf-tag
+    * -s sep -- character or string separating authors/year/optional
+    * -C -- do not ignore case
+    * -i none|only|plus -- use introspection of the PDF file: convert the first page
+            to text and compare it to the title of each entry; may take a long time;
+            requires pdftotext; only means that author/year inspection is not done
+            plus means the pdf has to fulfill both author/year and pdf-introspection
+    
+==sort
+
+    Usage: bibmanip.py bibfile.bib sort [-o outfile] [-f field]
+
+    Options
+    * -f field -- sort the entries by field; default is to sort by key
+    * -o outfile -- redirect output to outfile; else it is written to stdout    
+    
+==splitbytag
+
+    Usage: bibmanip.py bibfile.bib splitbytag [-u] [-a] outputdir
+
+    Creates separate bibtex-files for each tag, each containing
+    bibfile's entries belonging to each tag and all strings/comments.
+
+    Options:
+    * -u -- include untagged entry in 'notag.bib'
+    * -a -- include all entries in 'all.bib'
+    
+==stats
+
+    Usage: bibmanip.py bibfile.bib stats
+
+    Print some statistics about the bibtex-file.
+    

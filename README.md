@@ -8,6 +8,7 @@ See
 ```shell
 bibmanip -h
 ```
+
 for a list of the available subcommands.
 
 

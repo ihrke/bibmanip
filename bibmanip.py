@@ -1,19 +1,13 @@
 #!/usr/bin/env python
 """
+Usage: bibmanip [-h] [-c] bibfile.bib <command> [command_args]
+
 Bibtex-manipulation program.
 
-Example: Merging two files with partially overlapping entries
-1) simple append the files
-   $ cat file1.bib > bfile.bib
-   $ cat file2.bib >> bfile.bib
-2) detect duplicates
-   $ bibmanip.py bfile.bib duplicates -o dup.bib
-3) cut these from the original file
-   $ x=`bibmanip.py bfile.bib listkeys -p`
-   $ bibmanip.py bfile.bib cutentries -o new.bib -d $x
-4) merge the duplicates in dup.bib by hand
-5) combine the files
-   $ cat dub.bib >> new.bib
+Options:
+ * -h -- print help and exit
+ * -c -- use colored output (termcolor.py)
+
 """
 from bibparse import *
 import glob
@@ -21,7 +15,6 @@ import string
 import sys, re
 import time
 import inspect
-from termcolor import *
 import getopt
 import subprocess
 
@@ -33,6 +26,10 @@ def __my_doc__(n=1):
     """Print the docstring of the calling function."""
     frame = inspect.stack()[n][0]
     return frame.f_globals[frame.f_code.co_name].__doc__
+
+def colored( str, color=None, attrs=None):
+    """placeholder for the termcolor.colored function"""
+    return str
 
 def addtag( bibfile, args ):
     """
@@ -679,25 +676,52 @@ def stats( bibfile, args ):
     
 ### main file
 if __name__=="__main__":
-    if len(sys.argv)<3:
-        print colored("Usage: %s bibfile.bib <command> [command_args]\n"%
-                      sys.argv[0], "yellow",attrs=["bold"]);
-        print "Available commands: "+colored(", ".join(commands), "green", attrs=["bold"])+"\n"
-        for c in commands:
-            print "==%s"%colored(c,color="green",attrs=["bold"])
-            print eval(c).__doc__
-        sys.exit();
+    commands.sort()
+    command=None
+    idx=len(sys.argv)
+    for c in commands:
+        if c in sys.argv:
+            command=c
+            idx=sys.argv.index(c)
+            break
+    args=sys.argv[1:idx]
+    cmd_args=sys.argv[(idx+1):] if idx<len(sys.argv) else []
 
-    bibfilename=sys.argv[1];
+    try:
+        opts,bargs=getopt.getopt( args, "hc");
+        opts=dict(opts);
+        if opts.has_key("-c"):
+            from termcolor import *
+        if opts.has_key("-h"):    # print help and exit
+            print __doc__
+            print "Available commands: "+colored(", ".join(commands), "green",
+                                                 attrs=["bold"])+"\n"
+            for c in commands:
+                print "==%s"%colored(c,color="green",attrs=["bold"])
+                print eval(c).__doc__
+            sys.exit();
+        if len(bargs)<1:
+            raise getopt.GetoptError(colored("ERROR: need a bibtex-file","red"))
+        bibfilename=bargs[0]
+    except getopt.GetoptError, err:
+        print str(err) 
+        print __doc__
+        sys.exit()
+
+
+    if not command:
+        print colored("ERROR: ","red")+"no command given"
+        print "Available commands: "+colored(", ".join(commands), "green", attrs=["bold"])+"\n"
+        sys.exit();
+        
     if not os.path.exists(bibfilename):
         print colored("ERROR: ","red")+"%s does not exist"%colored(bibfilename,"green");
         sys.exit();
-    command=sys.argv[2];
+
     if not dict([(x,0) for x in commands]).has_key(command):
         print colored("ERROR","red")+" -- do not know command %s"%colored(command,"yellow")
         sys.exit();
 
-    args=sys.argv[3:];
     bib=BibtexFile(bibfilename);
     bib.parse();
 
@@ -706,6 +730,6 @@ if __name__=="__main__":
     bib.bibcomments.append(comment);
 
     # run the command
-    bib=eval("%s(bib,args)"%(command));
+    bib=eval("%s(bib,cmd_args)"%(command));
 
 
