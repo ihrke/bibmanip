@@ -11,7 +11,7 @@ bibmanip -h
 
 for a list of the available subcommands (this list is also in HELP.txt).
 
-For some examples, see [Examples](Examples.md).
+For some examples, see [Examples](EXAMPLES.md).
 
 Things to know
 --------------
