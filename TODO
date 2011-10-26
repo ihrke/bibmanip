@@ -1,0 +1,18 @@
+* get all ISI abbreviations (https://github.com/jiho/ISI-Bib-Toggle ?) and
+  create @STRING variables using the concatenated abbreviations as key
+  + script to replace all journal names by their corresponding strings
+    (need to take care of stuff like missing colons, case...)
+
+* fix paths in create_html.py (the links in the html-output are broken)
+
+* implement tag-merging, tag-renaming
+
+* implement adding a date to each entry
+
+* implement string expansion/collapse for @string{}'s
+
+* Implement a comparison of equivalence of two bibtex-files
+  by passing both through, e.g., bibtex2html and compare the result
+  - this can be used to check that the parser works:
+    1) pass a valid bibtex-file through bibmanip
+    2) run the above test to check the integrity
