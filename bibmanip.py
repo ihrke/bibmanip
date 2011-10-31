@@ -20,7 +20,7 @@ import subprocess
 
 commands=["addtag", "splitbytag", "delfield", "matchpdf", "checkpdf", "stats",
           "compare", "cutentries", "duplicates", "listentries", "addentries",
-          "sort"];
+          "sort", "getkey"];
 
 def __my_doc__(n=1):
     """Print the docstring of the calling function."""
@@ -62,6 +62,54 @@ def addtag( bibfile, args ):
             sys.stderr.write(">> %s -- %s\n"%(colored(e.key,"yellow"),colored(str(e.get_tags()), "green")));
 
     print bibfile
+
+
+def getkey( bibfile, args ):
+    """
+    Usage: getkey [-h] [-r] [-o output] pattern
+    
+    Display key of entries/strings matching the pattern.
+    
+    Options:
+    * -h -- print help and exit
+    * -r -- if provided, pattern is a regex
+    * -o outfile -- redirect output to outfile; else it is written to stdout
+    """
+    
+    try:
+        opts,bargs=getopt.getopt( args, "ro:h");
+        opts=dict(opts);
+        if opts.has_key("-h"):
+            print __my_doc__()
+            sys.exit()
+        if len(bargs)<1:
+            raise getopt.GetoptError(colored("ERROR: need a pattern","red"))
+        pattern=bargs[0];
+        use_re= True if opts.has_key("-r") else False
+        outfile=opts["-o"] if opts.has_key("-o") else None
+    except getopt.GetoptError, err:
+        print str(err) # will print something like "option -a not recognized"
+        print __my_doc__();
+        sys.exit()
+
+    if len(bibfile.bibstrings)>0:
+        print "== "+colored("@STRINGs","yellow")+" =="
+        for s in bibfile.bibstrings:
+            if (use_re and re.search( pattern, s.value,
+                                      re.IGNORECASE|re.DOTALL )) or s.value.find(pattern)>0:
+                print ">> %s = %s%s"%(colored(s.label, "green"), s.value[:(80-len(s.label)-6)],
+                                      "..." if len(s.value)>(80-len(s.label)-6) else "")
+    if len(bibfile.bibentries)>0:
+        print "== "+colored("@ENTRIEs","yellow")+" =="
+        for e in bibfile.bibentries:
+            if (use_re and re.search( pattern,
+                                      e.org_content, re.IGNORECASE|re.DOTALL
+                                      )) or e.org_content.find(pattern)>0:
+                print ">> %s = %s%s"%(colored(e.key, "green"), e.data["title"]
+                                      [:(80-len(e.key)-6)].replace("\n"," "),
+                                      "..." if len(e.data["title"])>(80-len(e.key)-6) else "")
+
+                
 
 def delfield( bibfile, args ):
     """

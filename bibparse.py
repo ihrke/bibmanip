@@ -262,7 +262,7 @@ class BibtexFile:
 		bf=self.bibtexcontent			
 
 		# get all strings
-		stringpattern=re.compile(r"@string{(\w+)=(.*?)}(?=\s*@)", re.DOTALL);
+		stringpattern=re.compile(r"@string{\s*([a-zA-Z0-9_-]+)\s*=\s*(.*?)\s*}(?=\s*@)", re.DOTALL);
 		strings=stringpattern.finditer( bf );
 		for s in strings:
 			lab=s.groups()[0].strip();
