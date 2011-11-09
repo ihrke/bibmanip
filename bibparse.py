@@ -26,6 +26,49 @@ class BibtexEntry:
 		self.org_content="";
 		self.btype = type;
 
+	def get_authors(self):
+		"""
+		Split the author- and editor fields.  Returns a tuple
+		(authors,editors), each entry is an ordered list of dictionaries
+		possibly with the entries 'last', 'middle', 'first'.
+		"""
+		def _parse_author(e):
+			## this is the last, first.middle. style
+			if e.find(",")>0:
+				l=e.split(",")
+				last=l[0]
+				rest=l[1:]
+			## this is the "first middle lastname" style
+			else:
+				l=e.split(" ")
+				last=l[len(l)-1]
+				rest=l[0:(len(l)-1)]
+
+			## rest is now a list of some stuff
+			rest=" ".join( ((" ".join(rest)).replace("."," ")).split() )
+			rest=re.sub( r"([A-Z])([A-Z])", r"\g<1> \g<2>", rest )
+			l=rest.split()
+			first = l[0] if len(l)>0 else None
+			middle= ". ".join(l[1:]) if len(l)>1 else None
+			return (first, middle, last)
+
+
+		au=[];
+		ed=[];
+		if self.data.has_key("author"):
+			r=" ".join(self.data["author"].split())
+			r=r.split(" and ")
+			for e in r:
+				(first,middle,last)=_parse_author(e)
+				au.append( {'last':last,'middle':middle,'first':first} )
+		if self.data.has_key("editor"):
+			r=self.data["editor"].replace("\n","").split(" and ")
+			for e in r:
+				(first,middle,last)=_parse_author(e)
+				ed.append( {'last':last,'middle':middle,'first':first} )
+
+		return (au if len(au)>0 else None, ed if len(ed)>0 else None)
+
 	def compare_by_title(self, entry):
 		"""return True if the title of self and entry BibtexEntry correspond"""
 		if self.data.has_key("title"):
