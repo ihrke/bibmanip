@@ -1,0 +1,31 @@
+blockquote { background: #e7e7e7; }
+
+	 
+textarea#editcontent {
+	 width: 75%;
+}
+
+#content {
+/*	 border: 1px solid red;*/
+/* top right bottom left */
+/*	 margin: 1em 10em 1em 2em;*/
+}
+
+.bt_tagcloud {
+	 float: right;
+	width: 30%;
+	text-align: center;
+	padding: 10px 10px;
+	border: 1px solid #aaa;
+	background: #eee;
+	color: black !important;
+}
+
+
+h1,h2,h3,h4,h5,h6{
+    border-bottom: 1px solid #aaa;
+}
+
+h1 { font: 140% sans-serif }
+h2 { font: bold 120% sans-serif }
+h3, h4, h5, h6 { font: bold 100% sans-serif }

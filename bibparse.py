@@ -95,6 +95,10 @@ class BibtexEntry:
 		else:
 			return False;
 
+	def tohtml(self):
+		result = StringIO()
+		result.write("NOT IMPLEMENTED")
+		return result.getvalue()
 
 	def __str__(self):
 		result = StringIO()
