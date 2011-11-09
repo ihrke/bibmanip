@@ -50,21 +50,47 @@ def get_cloud( bf, params=None ):
 
 print "Content-type: text/html\n"
 BIBFILE=form["bibtex-file"].value if form.has_key("bibtex-file") else "master.bib"
+BYTAG=form["tag"].value if form.has_key("tag") else None
+ENTRY=form["entry"].value if form.has_key("entry") else None
 
 print "<HTML>\n<link rel='stylesheet' type='text/css'  href='local.css'>"
 print "<BODY>"
 
-
-print "Using file: %s"%BIBFILE
 bib=BibtexFile( BIBFILE )
 bib.parse()
+params={'bibtex-file':BIBFILE};
 
-print get_cloud( bib, {'bibtex-file':BIBFILE} )
+if ENTRY:
+    print "<H1>%s</H1>"%(ENTRY)
+    print "<div id='bibfile'>Using file: %s</div>"%BIBFILE
+    print "<div id='citation'>%s</div>"%bib[ENTRY].tohtml()
+    print "<pre>%s</pre>"%(bib[ENTRY])
+else:
+    if BYTAG:
+        print "<H1>Tag: %s</H1>"%BYTAG
+    else:
+        print "<H1>All Entries</H1>"
 
-print "<ul>"
-for e in bib.bibentries:
-    print "<li>%s</li>"%e.tohtml()
-print "</ul>"
+    print "<div id='bibfile'>Using file: %s</div>"%BIBFILE
+    print get_cloud( bib, {'bibtex-file':BIBFILE} )
+
+    print "<div id='entrylist'><ul>"
+    for e in bib.bibentries:
+        if BYTAG and not BYTAG in e.get_tags():
+            continue
+        print "<li><a id='entrylink' href='%s'>%s</a>"%(cgiify(dict(params, **{'entry':e.key})),e.tohtml())
+        if len( e.get_tags())>0:
+            print "<br>"
+        print "<span id='taglist'>"
+        for t in e.get_tags():
+            print "<a href='%s'>%s</a>"%(cgiify(dict(params,**{'tag':t})),t)
+        print "</span>"
+        if e.get_pdf():
+            print "<a id='pdf' href='%s'>[PDF]</a>"%(e.get_pdf())
+        print "</li>"
+    print "</ul></div>"
 
 
 print "</BODY></HTML>"
+
+
