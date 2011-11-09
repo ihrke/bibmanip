@@ -139,8 +139,23 @@ class BibtexEntry:
 			return False;
 
 	def tohtml(self):
+		"""
+		just some ad-hoc style
+		"""
 		result = StringIO()
-		result.write("NOT IMPLEMENTED")
+		(au,ed)=self.get_authors()
+		if au:
+			result.write( ", ".join( [ a['last'] for a in au ] ) )
+		if ed:
+			result.write( ", ".join( [ e['last'] for e in ed ] ) )
+			result.write( " (editor)" )
+
+		if self.data.has_key("year"):
+			result.write( " (%s): "%self.data["year"])
+
+		if self.data.has_key("title"):
+			ti=re.sub( r"{(.*)}", r"\g<1>", self.data["title"].strip())
+			result.write( " <i>%s</i>"%ti)
 		return result.getvalue()
 
 	def __str__(self):
