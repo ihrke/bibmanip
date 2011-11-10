@@ -87,6 +87,8 @@ else:
         print "</span>"
         if e.get_pdf():
             print "<a id='pdf' href='%s'>[PDF]</a>"%(e.get_pdf())
+        if e.data.has_key("url"):
+            print "<a id='url' href='%s'>[URL]</a>"%(e.data["url"])
         print "<form>new tag: <input type='text' name='newtag'>"
         params["key"]=e.key
         for p in params.keys():

@@ -154,8 +154,13 @@ class BibtexEntry:
 			result.write( " (%s): "%self.data["year"])
 
 		if self.data.has_key("title"):
-			ti=re.sub( r"{(.*)}", r"\g<1>", self.data["title"].strip())
+			ti = self.data["title"].strip();
+			while 1:
+				(ti,tin)=re.subn( r"{(.*)}", r"\g<1>", ti )
+				if tin==0:
+					break
 			result.write( " <i>%s</i>"%ti)
+			
 		return result.getvalue()
 
 	def __str__(self):
