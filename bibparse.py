@@ -19,6 +19,7 @@ fieldsequence=["author", "editor", "year", "title", "booktitle", "journal", "pub
 					"volume","number","pages", "month","day", "doi","url", "uri", "abstract","issn",
 					"keywords","institution", "copyright", "lccn", "tags","pdf", "comment"]
 
+
 class BibtexEntry:
 	def __init__(self, type, key ):
 		self.key = key;
