@@ -70,8 +70,8 @@ if ADDTAG and KEY:
     bib.save()
     del params["newtag"]
     del params["key"]
-    cmd="git commit -a -m 'from web'"
-    os.system(cmd)
+#    cmd="git commit -a -m 'from web'"
+#    os.system(cmd)
 
 if DELTAG and KEY:
     bib[KEY].del_tag(DELTAG)
