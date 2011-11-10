@@ -110,6 +110,9 @@ class BibtexEntry:
 				sep=","
 			self.tags=[z.replace("}","").replace("{","").strip()
 						  for z in  self.data["tags"].split(sep)];
+		# remove empty strings
+		self.tags=[ t for t in self.tags if len(t)>0 ]
+			
 
 	def get_pdf(self):
 		if self.data.has_key("pdf"):
@@ -130,7 +133,22 @@ class BibtexEntry:
 			self.tags.append(tags);
 		self.tags=list(set(self.tags));
 		self.tags.sort();		
-		self.data["tags"]="{%s}"%(";".join(self.tags));
+		self.data["tags"]="%s"%(";".join(self.tags));
+
+	def del_tag(self, tags):
+		self._calc_tags();
+		if isinstance(tags,list):
+			for t in tags:
+				if t in self.tags:
+					tidx=self.tags.index( t )
+					del self.tags[tidx]
+		else:
+			if tags in self.tags:
+				tidx=self.tags.index( tags )
+				del self.tags[tidx]
+		self.tags=list(set(self.tags));
+		self.tags.sort();		
+		self.data["tags"]="%s"%(";".join(self.tags));
 
 	def re_match(self, pattern, re_flags=re.DOTALL, use_org_content=True):
 		if re.search( pattern, self.org_content, re_flags ):
@@ -145,21 +163,40 @@ class BibtexEntry:
 		result = StringIO()
 		(au,ed)=self.get_authors()
 		if au:
-			result.write( ", ".join( [ a['last'] for a in au ] ) )
+			result.write( ", ".join( [ re.sub(r"{(.*)}", r"\g<1>", a['last']) for a in au ] ) )
 		if ed:
-			result.write( ", ".join( [ e['last'] for e in ed ] ) )
+			result.write( ", ".join( [ re.sub(r"{(.*)}", r"\g<1>", e['last']) for e in ed ] ) )
 			result.write( " (editor)" )
 
 		if self.data.has_key("year"):
 			result.write( " (%s): "%self.data["year"])
 
 		if self.data.has_key("title"):
-			ti = self.data["title"].strip();
+			ti = " ".join(self.data["title"].strip().split())
 			while 1:
-				(ti,tin)=re.subn( r"{(.*)}", r"\g<1>", ti )
+				(ti,tin)=re.subn( r"{(.*)}", r"\g<1>", ti );
 				if tin==0:
 					break
-			result.write( " <i>%s</i>"%ti)
+			ti = re.sub( r"(.*)\.$", r"\g<1>", ti );
+			result.write( " <b>%s.</b> "%ti)
+
+		if self.data.has_key("journal"):
+			jo = " ".join(self.data["journal"].strip().split())
+			jo = re.sub( r"(.*)\.$", r"\g<1>", jo );			
+			result.write( "<i>%s.</i> "%jo);
+
+			if self.data.has_key("volume"):
+				result.write( "%s"%self.data["volume"] )
+			if self.data.has_key("number"):
+				result.write( " (%s)"%self.data["number"] )
+			if self.data.has_key("pages"):
+				result.write( ", %s"%self.data["pages"].replace("--","-") )
+
+		elif self.data.has_key("publisher"):
+			jo = " ".join(self.data["publisher"].strip().split())
+			jo = re.sub( r"(.*)\.$", r"\g<1>", jo );			
+			result.write( "<i>%s.</i> "%jo);
+			
 			
 		return result.getvalue()
 

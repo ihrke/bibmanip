@@ -52,19 +52,59 @@ print "Content-type: text/html\n"
 BIBFILE=form["bibtex-file"].value if form.has_key("bibtex-file") else "master.bib"
 BYTAG=form["tag"].value if form.has_key("tag") else None
 ENTRY=form["entry"].value if form.has_key("entry") else None
+ADDTAG=form["newtag"].value if form.has_key("newtag") else None
+DELTAG=form["deltag"].value if form.has_key("deltag") else None
+KEY=form["key"].value if form.has_key("key") else None
+params=dict( [ (k, form[k].value) for k in form.keys()  ] );
 
 print "<HTML>\n<link rel='stylesheet' type='text/css'  href='local.css'>"
 print "<BODY>"
+print "<ul id='navigate'><li><a id='navlink' href='%s'>HOME</a></li></ul>"%(SCRIPTNAME+cgiify({"bibtex-file":BIBFILE}))
 
 bib=BibtexFile( BIBFILE )
 bib.parse()
-params={'bibtex-file':BIBFILE};
 
+## ------- MANIPULATION --------------
+if ADDTAG and KEY:
+    bib[KEY].add_tag(ADDTAG)
+    bib.save()
+    del params["newtag"]
+    del params["key"]
+    cmd="git commit -a -m 'from web'"
+    os.system(cmd)
+
+if DELTAG and KEY:
+    bib[KEY].del_tag(DELTAG)
+    bib.save()
+    del params["deltag"]
+    del params["key"]
+    
+
+## ------- DISPLAY --------------
 if ENTRY:
     print "<H1>%s</H1>"%(ENTRY)
+    e=bib[ENTRY]
     print "<div id='bibfile'>Using file: %s</div>"%BIBFILE
-    print "<div id='citation'>%s</div>"%bib[ENTRY].tohtml()
-    print "<pre>%s</pre>"%(bib[ENTRY])
+    print "<div id='citation'>%s</div>"%e.tohtml()
+    if e.get_pdf():
+        print "<a id='pdf' href='%s'>[PDF]</a>"%(e.get_pdf())
+    if e.data.has_key("url"):
+        print "<a id='url' href='%s'>[URL]</a>"%(e.data["url"])
+    print "<br><span id='taglist'>"
+    for t in e.get_tags():
+        print "<a href='%s'>%s</a>"%(cgiify({'bibtex-file':BIBFILE,'tag':t}),t)
+        print "<a id='deltag' href='%s'>X</a>"%(SCRIPTNAME+cgiify(dict( params, **{'deltag':t,'key':ENTRY})) )
+    print "</span>"
+    print "<form>new tag: <input type='text' name='newtag'>"
+    params["key"]=e.key
+    for p in params.keys():
+        print "<input type='hidden' name='%s' value='%s'>"%(p,params[p])
+    print "</form>"
+    
+    print "<pre id='bibtex'>%s</pre>"%(e)
+
+
+    
 else:
     if BYTAG:
         print "<H1>Tag: %s</H1>"%BYTAG
@@ -89,11 +129,6 @@ else:
             print "<a id='pdf' href='%s'>[PDF]</a>"%(e.get_pdf())
         if e.data.has_key("url"):
             print "<a id='url' href='%s'>[URL]</a>"%(e.data["url"])
-        print "<form>new tag: <input type='text' name='newtag'>"
-        params["key"]=e.key
-        for p in params.keys():
-            print "<input type='hidden' name='%s' value='%s'>"%(p,params[p])
-        print "</form>"
         print "</li>"
     print "</ul></div>"
 

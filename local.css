@@ -18,6 +18,21 @@
 	 font: 70% sans-serif;
 }
 
+ul#navigate {
+	 padding: 10px 12px 10px 8px;
+	 list-style-type:none;
+	 text-align: center;
+	 margin:0;
+}
+#navigate li{
+	 display: inline;
+}
+
+#navlink {
+	 text-decoration: none;
+	 font: 120%;
+}
+
 #bibfile {
 	 background: lightgrey;
 	 width: 30%;
@@ -31,15 +46,24 @@
 	 text-decoration: none;
 	 color: black;
 }
+a#entrylink:hover {
+	 color: blue;
+}
 
 #pdf {
 	 text-decoration: none;
 }
+
 #url {
 	 text-decoration: none;
 }
+#entrylist {
+	 width: 50%;
+}
 
-
+pre#bibtex {
+	 background: lightyellow;
+}
 
 #taglist a:hover
 {
